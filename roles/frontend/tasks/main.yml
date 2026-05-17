@@ -1,0 +1,38 @@
+
+    - name: install nginx
+      ansible.builtin.dnf:
+        name: nginx
+        state: latest
+
+    - name: copy nginx conf
+      ansible.builtin.copy:
+        src: nginx.conf
+        dest: /etc/nginx/nginx.conf
+
+    - name: remove app content folder
+      ansible.builtin.file:
+        path: /usr/share/nginx/html/
+        state: absent
+
+    - name: create app content folder
+      ansible.builtin.file:
+        path: /usr/share/nginx/html/
+        state: directory
+
+    - name: Ensure unzip is installed
+      ansible.builtin.package:
+        name: unzip
+        state: present
+      become: true
+
+    - name: download frontend content
+      ansible.builtin.unarchive:
+        src: https://raw.githubusercontent.com/raghudevopsb89/roboshop-microservices/main/artifacts/frontend-compiled.zip
+        dest: /usr/share/nginx/html/
+        remote_src: yes
+
+    - name: nginx start
+      ansible.builtin.systemd_service:
+        name: nginx
+        state: restarted
+        enabled: yes
